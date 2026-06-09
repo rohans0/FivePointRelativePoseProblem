@@ -1,5 +1,7 @@
 from sympy import Matrix, Poly, groebner, latex, symbols, trace
 
+a, b, c = symbols('a b c')
+
 # image 1
 q1 = [(31, 3), (39, 6),(30, 18),(51, 44),(26, 41)]
 # image 2
@@ -15,16 +17,14 @@ Q = Matrix([
 E_vec = Q.nullspace()
 
 # E=aE_1+bE_2+cE_3+dE_4
-# note we set d=1
-a, b, c = symbols('a b c')
-
+# note we rescale so d=1
 E = a*E_vec[0] + b*E_vec[1] + c*E_vec[2] + E_vec[3]
 E = Matrix(E).reshape(3, 3)
 
 # apply the Demazure constraint to get the Ideal
 I = 2*E*E.T*E - trace(E*E.T)*E
 
-# 9 deg-3 polynom
+# 9 max deg-3 polynom
 I = list(I)
 
 # Calculate Groebner basis under grevlex order
@@ -33,12 +33,5 @@ G = groebner(I, a, b, c, order='grevlex')
 # lex order for easy elimination
 G = groebner(G, a, b, c, order='lex')
 
-result = []
-for g in G:
-    P = Poly(g)
-    result.append(P.as_expr().xreplace({
-        c: round(float(c), 3) for c in P.as_dict().values()
-    }))
+print(Poly(G[-1]).nroots())
 
-for p in result:
-    print(latex(p))
